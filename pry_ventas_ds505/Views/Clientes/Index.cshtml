@@ -1,0 +1,251 @@
+﻿@model pry_ventas_ds505.Models.Cliente
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section EstiloDT {
+    <link rel="stylesheet" href="~/lib/datatables.net/css/jquery.dataTables.min.css" />
+}
+
+<h1><i class="fas fa-users"></i> Listado de Clientes</h1>
+<hr />
+
+<div class="container">
+    <!-- Modal -->
+    <div class="modal fade" id="Formulario" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <form>
+                                <div class="form-group">
+                                    <label asp-for="ID_Cliente" class="control-label"></label>
+                                    <input asp-for="ID_Cliente" class="form-control" type="number" />
+                                    <span asp-validation-for="ID_Cliente" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Nombre" class="control-label"></label>
+                                    <input asp-for="Nombre" class="form-control" />
+                                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Apellido" class="control-label"></label>
+                                    <input asp-for="Apellido" class="form-control" />
+                                    <span asp-validation-for="Apellido" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Direccion" class="control-label"></label>
+                                    <input asp-for="Direccion" class="form-control" />
+                                    <span asp-validation-for="Direccion" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="CorreoElectronico" class="control-label"></label>
+                                    <input asp-for="CorreoElectronico" class="form-control" />
+                                    <span asp-validation-for="CorreoElectronico" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Telefono" class="control-label"></label>
+                                    <input asp-for="Telefono" class="form-control" />
+                                    <span asp-validation-for="Telefono" class="text-danger"></span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btn_cerrar" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-window-close"></i> Cerrar
+                    </button>
+                    <button type="button" id="btn_grabar" class="btn btn-outline-primary"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br />
+
+    <div class="row">
+        <div class="row mt-3">
+            <table id="tb_clientes" class="table table-striped display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(cli => cli.ID_Cliente)</th>
+                        <th>@Html.DisplayNameFor(cli => cli.Nombre)</th>
+                        <th>@Html.DisplayNameFor(cli => cli.Apellido)</th>
+                        <th>@Html.DisplayNameFor(cli => cli.Direccion)</th>
+                        <th>@Html.DisplayNameFor(cli => cli.CorreoElectronico)</th>
+                        <th>@Html.DisplayNameFor(cli => cli.Telefono)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <p>No Existen Registros</p>
+            <div class="text-lg-center">
+                <h2>Elaborado por Aldair Villegas</h2>
+            </div>
+        </div>
+        @section Scripts {
+            <script src="~/lib/datatables.net/js/jquery.dataTables.js"></script>
+            <script src="~/lib/datatables.net/js/dataTables.buttons.min.js"></script>
+            <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+            <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+            <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+            <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+
+            <script>
+                $(document).ready(function () {
+                    $('#tb_clientes').DataTable({
+                        "ajax": {
+                            "url": "@Url.Action("Listar", "Clientes")",
+                            "type": "GET",
+                            "dataType": "json"
+                        },
+                        "columns": [
+                            { "data": "iD_Cliente" },
+                            { "data": "nombre" },
+                            { "data": "apellido" },
+                            { "data": "direccion" },
+                            { "data": "correoElectronico" },
+                            { "data": "telefono" },
+                            {
+                                "data": "iD_Cliente", "render": function (data) {
+                                    return "<button class='btn btn-outline-success' type='button' onclick='AbrirRegistro(" + data + ")'><i class='far fa-edit'></i></button>" +
+                                        "<button class='btn btn-outline-danger' type='button' onclick='Eliminar(" + data + ")'><i class='fas fa-trash-alt'></i></button>";
+                                }
+                            }
+                        ],
+                        "order": [[1, "asc"]],
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                extend: 'excelHtml5',
+                                text: 'Exportar a Excel',
+                                className: 'btn btn-outline-success',
+                                exportOptions: {
+                                    columns: [0, 1, 2, 3, 4, 5]
+                                }
+                            },
+                            {
+                                extend: 'pdfHtml5',
+                                text: 'Exportar a PDF',
+                                className: 'btn btn-outline-danger',
+                                exportOptions: {
+                                    columns: [0, 1, 2, 3, 4, 5]
+                                }
+                            },
+                            {
+                                text: "Registrar Cliente",
+                                attr: { class: "btn btn-outline-primary" },
+                                action: function () {
+                                    AbrirRegistro("");
+                                }
+                            }
+                        ]
+                    });
+                });
+
+                function AbrirRegistro(id_Cliente) {
+                    if (id_Cliente != "") {
+                        $.ajax({
+                            url: "@Url.Action("Consultar", "Clientes")" + "?ID_Cliente=" + id_Cliente,
+                            type: "GET",
+                            dataType: "json",
+                            success: function (data) {
+                                if (data != null) {
+                                    $("#ID_Cliente").val(data.iD_Cliente).attr("readonly", true);
+                                    $("#Nombre").val(data.nombre);
+                                    $("#Apellido").val(data.apellido);
+                                    $("#Direccion").val(data.direccion);
+                                    $("#CorreoElectronico").val(data.correoElectronico);
+                                    $("#Telefono").val(data.telefono);
+                                }
+                            },
+                            error: function (error) {
+                                console.log("Error al consultar cliente:", error);
+                            }
+                        });
+                        $(".modal-title").text("Editar Cliente");
+                        $("#btn_grabar").html("<i class='fas fa-save'></i> Guardar Cambios");
+                    } else {
+                        $("#ID_Cliente").attr("readonly", false);
+
+                        $("#ID_Cliente").val("");
+                        $("#Nombre").val("");
+                        $("#Apellido").val("");
+                        $("#Direccion").val("");
+                        $("#CorreoElectronico").val("");
+                        $("#Telefono").val("");
+
+                        $(".modal-title").text("Registrar Cliente");
+                        $("#btn_grabar").html("<i class='fas fa-save'></i> Guardar Datos");
+                    }
+                    $("#Formulario").modal("show");
+                };
+
+
+                $("#btn_grabar").click(function (e) {
+                    let $cliente = {
+                        "id_Cliente": $("#ID_Cliente").val(),
+                        "nombre": $("#Nombre").val(),
+                        "apellido": $("#Apellido").val(),
+                        "direccion": $("#Direccion").val(),
+                        "correoElectronico": $("#CorreoElectronico").val(),
+                        "telefono": $("#Telefono").val()
+                    };
+
+                    jQuery.ajax({
+                        url: "@Url.Action("Grabar", "Clientes")",
+                        type: "POST",
+                        data: JSON.stringify($cliente),
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            if (data.resultado) {
+                                $("#tb_clientes").DataTable().ajax.reload();
+                                $("#Formulario").modal("hide");
+                            } else {
+                                alert("No fue posible grabar la información");
+                            }
+                        },
+                        error: function (error) {
+                            alert("Error al grabar la información");
+                        }
+                    });
+                });
+
+                function Eliminar(id_Cliente) {
+                    if (confirm("¿Seguro de eliminar?")) {
+                        jQuery.ajax({
+                            url: "@Url.Action("Borrar", "Clientes")" + "?id_Cliente=" + id_Cliente,
+                            type: "DELETE",
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            success: function (data) {
+                                if (data.resultado) {
+                                    $("#tb_clientes").DataTable().ajax.reload();
+                                } else {
+                                    alert("No se pudo eliminar el cliente");
+                                }
+                            },
+                            error: function (error) {
+                                alert("Error al eliminar el cliente");
+                            }
+                        });
+                    }
+                }
+            </script>
+        }
+    </div>
+</div>

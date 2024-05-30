@@ -1,0 +1,247 @@
+﻿@model pry_ventas_ds505.Models.Venta
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section EstiloDT {
+    <link rel="stylesheet" href="~/lib/datatables.net/css/jquery.dataTables.min.css" />
+}
+
+<h1><i class="fas fa-shopping-cart"></i> Registro de Ventas</h1>
+<hr />
+
+<div class="container">
+    <!-- Modal -->
+    <div class="modal fade" id="Formulario" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <form>
+                                <div class="form-group">
+                                    <label asp-for="ID_Venta" class="control-label"></label>
+                                    <input asp-for="ID_Venta" class="form-control" type="number" />
+                                    <span asp-validation-for="ID_Venta" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ID_Cliente" class="control-label"></label>
+                                    <input asp-for="ID_Cliente" class="form-control" type="number" />
+                                    <span asp-validation-for="ID_Cliente" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="FechaVenta" class="control-label"></label>
+                                    <input asp-for="FechaVenta" class="form-control" type="date" />
+                                    <span asp-validation-for="FechaVenta" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="TotalVenta" class="control-label"></label>
+                                    <input asp-for="TotalVenta" class="form-control" />
+                                    <span asp-validation-for="TotalVenta" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="MetodoPago" class="control-label"></label>
+                                    <input asp-for="MetodoPago" class="form-control" />
+                                    <span asp-validation-for="MetodoPago" class="text-danger"></span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btn_cerrar" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-window-close"></i> Cerrar
+                    </button>
+                    <button type="button" id="btn_grabar" class="btn btn-outline-primary"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br />
+
+    <div class="row">
+        <div class="row mt-3">
+            <table id="tb_ventas" class="table table-striped display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(venta => venta.ID_Venta)</th>
+                        <th>@Html.DisplayNameFor(venta => venta.ID_Cliente)</th>
+                        <th>@Html.DisplayNameFor(venta => venta.FechaVenta)</th>
+                        <th>@Html.DisplayNameFor(venta => venta.TotalVenta)</th>
+                        <th>@Html.DisplayNameFor(venta => venta.MetodoPago)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <p>No hay registros disponibles</p>
+            <div class="text-lg-center">
+                <h2>Elaborado por Aldair Villegas</h2>
+            </div>
+        </div>
+        @section Scripts {
+            <script src="~/lib/datatables.net/js/jquery.dataTables.js"></script>
+            <script src="~/lib/datatables.net/js/dataTables.buttons.min.js"></script>
+            <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+            <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+            <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+            <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+
+            <script>
+                $(document).ready(function () {
+                    $('#tb_ventas').DataTable({
+                        "ajax": {
+                            "url": "@Url.Action("Listar", "Ventas")",
+                            "type": "GET",
+                            "dataType": "json"
+                        },
+                        "columns": [
+                            { "data": "iD_Venta" },
+                            { "data": "iD_Cliente" },
+                            {
+                                "data": "fechaVenta",
+                                "render": function (data) {
+                                    return new Date(data).toLocaleDateString();
+                                }
+                            },
+                            { "data": "totalVenta" },
+                            { "data": "metodoPago" },
+                            {
+                                "data": "iD_Venta",
+                                "render": function (data) {
+                                    return "<button class='btn btn-outline-success' type='button' onclick='AbrirRegistro(" + data + ")'><i class='far fa-edit'></i></button>" +
+                                        "<button class='btn btn-outline-danger' type='button' onclick='Eliminar(" + data + ")'><i class='fas fa-trash-alt'></i></button>";
+                                }
+                            }
+                        ],
+                        "order": [[1, "asc"]],
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                text: "Registrar Venta",
+                                attr: { class: "btn btn-outline-primary" },
+                                action: function () {
+                                    AbrirRegistro("");
+                                }
+                            },
+                            {
+                                extend: 'excel',
+                                text: 'Exportar a Excel',
+                                className: 'btn btn-outline-success',
+                                exportOptions: {
+                                    columns: [0, 1, 2, 3, 4, 5 , 6]
+                                }
+                            },
+                            {
+                                extend: 'pdf',
+                                text: 'Exportar a PDF',
+                                className: 'btn btn-outline-danger',
+                                exportOptions: {
+                                    columns: [0, 1, 2, 3, 4, 5, 6]
+                                }
+                            },
+                            }
+                        ]
+                    });
+                });
+                function AbrirRegistro(id_Venta) {
+                    if (id_Venta != "") {
+                        $.ajax({
+                            url: "@Url.Action("Consultar", "Ventas")" + "?ID_Venta=" + id_Venta,
+                            type: "GET",
+                            dataType: "json",
+                            success: function (data) {
+                                if (data != null) {
+                                    $("#ID_Venta").val(data.iD_Venta).attr("readonly", true);
+                                    $("#ID_Cliente").val(data.iD_Cliente);
+                                    // Formatear la fecha correctamente
+                                    var fechaVenta = new Date(data.fechaVenta);
+                                    var fechaFormateada = fechaVenta.getFullYear() + '-' + ('0' + (fechaVenta.getMonth() + 1)).slice(-2) + '-' + ('0' + fechaVenta.getDate()).slice(-2);
+                                    $("#FechaVenta").val(fechaFormateada);
+                                    $("#TotalVenta").val(data.totalVenta);
+                                    $("#MetodoPago").val(data.metodoPago);
+                                }
+                            },
+                            error: function (error) {
+                                console.log("Error al consultar venta:", error);
+                            }
+                        });
+                        $(".modal-title").text("Editar Venta");
+                        $("#btn_grabar").html("<i class='fas fa-save'></i> Guardar Cambios");
+                    } else {
+                        $("#ID_Venta").attr("readonly", false);
+
+                        $("#ID_Venta").val("");
+                        $("#ID_Cliente").val("");
+                        $("#FechaVenta").val("");
+                        $("#TotalVenta").val("");
+                        $("#MetodoPago").val("");
+
+                        $(".modal-title").text("Registrar Venta");
+                        $("#btn_grabar").html("<i class='fas fa-save'></i> Guardar Datos");
+                    }
+                    $("#Formulario").modal("show");
+                }
+
+                $("#btn_grabar").click(function (e) {
+                    let $venta = {
+                        "ID_Venta": $("#ID_Venta").val(),
+                        "ID_Cliente": $("#ID_Cliente").val(),
+                        "FechaVenta": $("#FechaVenta").val(),
+                        "TotalVenta": $("#TotalVenta").val(),
+                        "MetodoPago": $("#MetodoPago").val()
+                    };
+
+                    jQuery.ajax({
+                        url: "@Url.Action("Grabar", "Ventas")",
+                        type: "POST",
+                        data: JSON.stringify($venta),
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            if (data.resultado) {
+                                $("#tb_ventas").DataTable().ajax.reload();
+                                $("#Formulario").modal("hide");
+                            } else {
+                                alert("No fue posible grabar la información");
+                            }
+                        },
+                        error: function (error) {
+                            alert("Error al grabar la información");
+                        }
+                    });
+                });
+
+                function Eliminar(id_Venta) {
+                    if (confirm("¿Seguro de eliminar?")) {
+                        jQuery.ajax({
+                            url: "@Url.Action("Borrar", "Ventas")" + "?ID_Venta=" + id_Venta,
+                            type: "DELETE",
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            success: function (data) {
+                                if (data.resultado) {
+                                    $("#tb_ventas").DataTable().ajax.reload();
+                                } else {
+                                    alert("No se pudo eliminar la venta");
+                                }
+                            },
+                            error: function (error) {
+                                alert("Error al eliminar la venta");
+                            }
+                        });
+                    }
+                }
+            </script>
+        }

@@ -9,7 +9,9 @@ namespace pry_ventas_ds505.Data
         {
         }
 
-        public DbSet<Personal> Personal { get; set; }
-        public DbSet<Categoria> Categoria { get; set; }
+        public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<Producto> Productos { get; set; }
+        public DbSet<Empleado> Empleados { get; set; }
+        public DbSet<Venta> Ventas { get; set; }
     }
 }
